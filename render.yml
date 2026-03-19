@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: my-node-backend # Change this to your app name
+    name: html-to-pdf # Change this to your app name
     env: node
     plan: free # This ensures you stay on the free tier
     buildCommand: npm install
-    startCommand: node index.js # Or "npm start" if defined in package.json
+    startCommand: npm start # Or "npm start" if defined in package.json
     envVars:
       - key: NODE_VERSION
         value: 20 # Best to specify your version
