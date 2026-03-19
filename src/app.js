@@ -40,7 +40,7 @@ app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev", { stream: mor
 app.use(requestLogger);
 
 // Health check
-app.get("/health", (_req, res) => {
+app.get("/", (_req, res) => {
   res.status(200).json({ status: "ok", uptime: process.uptime() });
 });
 
