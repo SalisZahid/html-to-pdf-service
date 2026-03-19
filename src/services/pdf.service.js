@@ -57,40 +57,24 @@ function wrapInDocument(html) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* PDF Specific Styles */
     @page { size: A4; margin: 0; margin-top: 18pt; }
-    @page :first { margin-top: 0; }
-    
-    /* Global Styles */
+    @page :first { margin-top: 12pt; margin-left: 12pt; margin-right: 12pt; }
     * { box-sizing: border-box; }
-    
-    /* Centering Logic for Web View */
-    html, body { 
-      margin: 0; 
-      padding: 0; 
-      min-height: 100vh; /* Ensure body takes full height */
-      display: flex;
-      justify-content: center; /* Horizontal Center */
-      align-items: center;     /* Vertical Center */
-      background-color: #f0f2f5; /* Light grey background */
-    }
-
-    /* Container for your Form/Content */
-    body > * { 
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      max-width: 600px;
-      width: 90%;
-    }
-
-    /* Your existing Inter font styles */
+    html, body { margin: 0; padding: 0; min-height: 0; }
+    body > *:first-child { margin-top: 0 !important; padding-top: 0 !important; }
     body, body * {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
-    
-    /* ... rest of your existing .appeal-letter styles ... */
+    .appeal-letter p, .appeal-letter div { margin: 0 0 0.75em 0; display: block; }
+    .appeal-letter p:last-child, .appeal-letter div:last-child { margin-bottom: 0; }
+    .appeal-letter p + p, .appeal-letter div + div { margin-top: 0.25em; }
+    .appeal-letter strong, .appeal-letter b { font-weight: 700; }
+    .appeal-letter em, .appeal-letter i { font-style: italic; }
+    .appeal-letter u { text-decoration: underline; }
+    .pdf-page { width: 100%; page-break-after: always; }
   </style>
 </head>
 <body>${html}</body>
