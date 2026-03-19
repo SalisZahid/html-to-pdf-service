@@ -3,10 +3,10 @@ services:
     name: html-to-pdf # Change this to your app name
     env: node
     plan: free # This ensures you stay on the free tier
-    buildCommand: npm run build
+    buildCommand: npm install
     startCommand: node src/server.js # Or "npm start" if defined in package.json
     envVars:
       - key: NODE_VERSION
         value: 20 # Best to specify your version
       - key: PORT
-        value: 40000
+        value: 10000
