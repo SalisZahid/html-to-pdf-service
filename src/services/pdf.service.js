@@ -57,7 +57,7 @@ function wrapInDocument(html) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @page { size: A4; margin: 0; margin-top: 18pt; }
+    @page { size: A4; margin-top: 18pt; margin-left: 12pt; margin-right: 12pt; }
     @page :first { margin-top: 12pt; margin-left: 12pt; margin-right: 12pt; }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; min-height: 0; }
