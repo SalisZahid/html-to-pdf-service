@@ -1,200 +1,84 @@
-# Introduction
+HTML-to-PDF Microservice
+A high-performance Node.js service dedicated to converting complex HTML into pixel-perfect PDF documents. This service is specifically engineered to solve common headless Chrome rendering issues such as character overlapping, font-loading race conditions, and layout shifts in cloud environments.
 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project.
+Core Objectives
+Visual Fidelity: Eliminates "squashed" text and overlapping lines caused by sub-pixel rendering in Puppeteer.
 
-# Getting Started
+Font Integrity: Injects custom TTF fonts (Inter) via Base64 to ensure zero-latency rendering and consistent typography.
 
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
+Cloud Resilience: Features a self-managing browser binary downloader optimized for volatile /tmp storage (e.g., Azure App Service).
 
-1. Installation process
-2. Software dependencies
-3. Latest releases
-4. API references
+Scalable Output: Seamlessly handles single-page strings or multi-part HTML arrays for automated document generation.
 
-# Build and Test
+Tech Stack
+Runtime: Node.js (ES Modules)
 
-TODO: Describe and show how to build your code and run the tests.
+PDF Engine: Puppeteer & @puppeteer/browsers
 
-# Contribute
+Framework: Express.js
 
-TODO: Explain how other users and developers can contribute to make your code better.
+Typography: Inter (Embedded via Base64/TTF)
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
+Logging: Winston + Morgan
 
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+Key Features & Fixes
+Advanced CSS Injection: Implements display: flow-root and min-height logic within the wrapper to ensure text wrapping never causes vertical collisions.
 
-## Datarover Backend
+Font-First Rendering: Bypasses external Google Font links by embedding font data directly into the document, ensuring domcontentloaded triggers only after the font is ready.
 
-Production-ready Node.js backend skeleton with a clean, scalable architecture. Built with Express, MongoDB (Mongoose), JWT auth, and best practices suitable for a SaaS product.
+Automated Binary Management: Dynamically detects the host platform and installs the required Chrome build, storing it in a configurable cache directory.
 
-### Tech Stack
+Viewport Optimization: Uses a calibrated desktop viewport (1000x1200) to ensure side-by-side elements don't collapse into mobile-style stacks during the PDF print process.
 
-- **Runtime**: Node.js (ES modules, latest LTS)
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose
-- **Auth**: JWT + bcrypt for password hashing
-- **Validation**: Joi
-- **Config**: dotenv-based env management
-- **Logging**: Winston (+ morgan HTTP logging)
-- **Security**: Helmet, CORS, rate limiting
-- **Docs**: Swagger (OpenAPI 3)
-
-### Folder Structure
-
-```text
+Folder Structure
+Plaintext
 src/
-  app.js               # Express app bootstrap (middleware, routes, swagger)
-  server.js            # HTTP server + DB bootstrap
-
-  config/
-    env.js             # Environment variables and config
-    db.js              # MongoDB connection via Mongoose
-
-  controllers/         # Request/response layer (thin, no business logic)
-    auth.controller.js
-    user.controller.js
-    health.controller.js
-
-  services/            # Business logic layer
-    auth.service.js
-    user.service.js
-
-  repositories/        # Data access layer (Mongoose queries)
-    user.repository.js
-
-  models/              # Mongoose schemas/models
-    user.model.js
-
+  services/
+    pdf.service.js      # Core logic: wrapInDocument, ensureChrome, & generatePdf
+  assets/
+    fonts/              # Local TTF files for Base64 injection
+  controllers/
+    pdf.controller.js   # API request handling
   routes/
-    v1/                # API versioning (/api/v1)
-      index.js
-      auth.routes.js
-      user.routes.js
-      health.routes.js
-
+    v1/
+      pdf.routes.js     # PDF generation endpoints
   middlewares/
-    auth.middleware.js         # JWT auth guard
-    error.middleware.js        # 404 + global error handler
-    logging.middleware.js      # Request logging via Winston
-    validation.middleware.js   # Joi-based request validation
-
-  validators/
-    auth.validator.js
-    user.validator.js
-
+    error.middleware.js # Global error handling
   utils/
-    logger.js          # Winston logger + morgan stream
-    apiResponse.js     # Success/error response formatters
-    AppError.js        # Custom error class
-    catchAsync.js      # Async controller wrapper
-    jwt.js             # JWT helpers
-    password.js        # bcrypt helpers
+    logger.js           # Structured logging via Winston
+    catchAsync.js       # Wrapper for async route handlers
+Getting Started
+1. Software Dependencies
+Node.js: v18 (LTS) or higher.
 
-  constants/
-    http.js            # Example constants (roles)
+Linux Packages: If deploying to Linux, ensure libnss3, libatk-1.0-0, and libgbm1 are available for Chromium.
 
-  docs/
-    swagger.js         # Swagger setup (OpenAPI 3)
+2. Installation
+Bash
+npm install
+3. Setup Environment
+Create a .env file in the root directory:
 
-  jobs/
-    example.job.js     # Placeholder for background jobs
-```
+Bash
+PORT=4000
+PUPPETEER_CACHE_DIR=/tmp/puppeteer
+# Optional: Override the executable path
+# PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+4. Usage
+Endpoint: POST /api/v1/pdf/generate
 
-### Core Modules
+Payload:
 
-- **Auth**
-  - `POST /api/v1/auth/register` – register user, hash password, return JWT.
-  - `POST /api/v1/auth/login` – login with email/password, return JWT.
-  - Uses `auth.service.js`, `user.repository.js`, `password.js`, `jwt.js`.
-  - `auth.middleware.js` protects downstream routes by validating `Authorization: Bearer <token>`.
+JSON
+{
+  "htmlParts": [
+    "<div><h1>Header</h1><p>Page 1 content...</p></div>",
+    "<div><h1>Section</h1><p>Page 2 content...</p></div>"
+  ]
+}
+NPM Scripts
+npm run dev: Start the server with nodemon for active development.
 
-- **User**
-  - `POST /api/v1/users` – create user (protected).
-  - `GET /api/v1/users` – list users with pagination params (`page`, `limit`).
-  - `GET /api/v1/users/:id` – get single user.
-  - `PATCH /api/v1/users/:id` – update user.
-  - `DELETE /api/v1/users/:id` – delete user.
+npm start: Production-grade execution.
 
-### Cross-Cutting Concerns & Best Practices
-
-- **Async/await & error handling**
-  - Controllers are wrapped with `catchAsync` so all errors flow into the centralized `errorHandler`.
-  - `AppError` carries HTTP status codes, human messages, and optional error details.
-
-- **Validation**
-  - `validation.middleware.js` wraps Joi schemas; each route passes a schema (e.g. `registerSchema`, `loginSchema`).
-  - On validation failure, an `AppError` with `400` is thrown and formatted by the global error handler.
-
-- **Response formatting**
-  - `successResponse` and `errorResponse` ensure consistent JSON shape across the API.
-
-- **Env-based config**
-  - `env.js` reads `.env` (via `dotenv`) and enforces required vars (e.g. `JWT_SECRET`).
-  - Different MongoDB URIs for `development` and `test`.
-
-- **Security & logging**
-  - `helmet`, `cors`, and `express-rate-limit` configured in `app.js`.
-  - `winston` for structured logs, with `morgan` hooked into Winston via `morganStream`.
-
-- **Versioning & health**
-  - All business endpoints are under `/api/v1/...`.
-  - `GET /api/v1/health` and root `/health` for basic health checks.
-
-### API Documentation
-
-- Swagger docs served at: `GET /api-docs`
-- OpenAPI spec is generated from JSDoc comments in `src/routes/v1/*.js` and the base config in `src/docs/swagger.js`.
-
-### Getting Started
-
-1. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-2. **Create `.env` file**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Minimal variables:
-
-   ```bash
-   NODE_ENV=development
-   PORT=4000
-   MONGODB_URI=mongodb://127.0.0.1:27017/datarover
-   JWT_SECRET=change_me
-   JWT_EXPIRES_IN=1d
-   CORS_ORIGIN=*
-   LOG_LEVEL=info
-   ```
-
-3. **Run in development**
-
-   ```bash
-   npm run dev
-   ```
-
-4. **Production run**
-
-   ```bash
-   npm start
-   ```
-
-### NPM Scripts
-
-- **`npm run dev`** – start server with `nodemon`.
-- **`npm start`** – start server with Node.
-- **`npm run lint`** – run ESLint on `src/**/*.js`.
-- **`npm run format`** – run Prettier on `src/**/*.js`.
-
-### Extending the Architecture
-
-- Add new modules by following the same pattern:
-  - `models/*` → `repositories/*` → `services/*` → `controllers/*` → `routes/v1/*`.
-- Keep controllers thin; put business logic in services.
-- Add background processing in `jobs/` (e.g., queue workers with Bull/Agenda).
+npm run lint: Analyze code for potential errors and style issues.
